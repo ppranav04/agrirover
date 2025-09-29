@@ -1,0 +1,49 @@
+<?xml version="1.0" ?>
+<robot xmlns:xacro="http://wiki.ros.org/xacro">
+
+    <xacro:macro name="agrirover_ros2_control">
+        <ros2_control name="arm_control" type="system">
+
+            <joint name="base_to_link_0">
+                <command_interface name="position">
+                    <param name="min">-1.57</param>
+                    <param name="max">1.57</param>
+                </command_interface>
+                <state_interface name="position"/>
+            </joint>
+
+            <joint name="link_0_to_link_1">
+                <command_interface name="position">
+                    <param name="min">-1.57</param>
+                    <param name="max">1.57</param>
+                </command_interface>
+                <state_interface name="position"/>
+            </joint>
+
+            <joint name="link_1_to_link_2">
+                <command_interface name="position">
+                    <param name="min">-1.57</param>
+                    <param name="max">1.57</param>
+                </command_interface>
+                <state_interface name="position"/>
+            </joint>
+
+            <joint name="link_2_to_gripper">
+                <command_interface name="position">
+                    <param name="min">-1.57</param>
+                    <param name="max">1.57</param>
+                </command_interface>
+                <state_interface name="position"/>
+            </joint>
+
+            <joint name="finger_1_joint">
+                <command_interface name="position">
+                    <param name="min">-1.57</param>
+                    <param name="max">1.57</param>
+                </command_interface>
+                <state_interface name="position"/>
+            </joint>
+        </ros2_control>
+    </xacro:macro>
+
+</robot>

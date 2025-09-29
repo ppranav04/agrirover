@@ -1,0 +1,25 @@
+Visualization Manager:
+  Displays:
+    - Class: rviz_default_plugins/RobotModel
+      Name: Robot Model
+      Robot Description: robot_description
+      Enabled: true
+    - Class: moveit_rviz_plugin/PlanningScene
+      Name: Planning Scene
+      Robot Description: robot_description
+      Enabled: true
+    - Class: moveit_rviz_plugin/MotionPlanning
+      Name: Motion Planning
+      Robot Description: robot_description
+      Enabled: true
+    - Class: rviz_default_plugins/InteractiveMarkers
+      Name: Interactive Markers
+      Enabled: true
+    - Class: moveit_rviz_plugin/RobotState
+      Name: Joint States
+      Enabled: true
+  Global Options:
+    Fixed Frame: base_link
+  Global Options:
+    Fixed Frame: base_link
+    Background Color: [48, 48, 48]

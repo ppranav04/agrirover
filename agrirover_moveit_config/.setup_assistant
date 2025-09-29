@@ -1,0 +1,10 @@
+moveit_setup_assistant_config:
+  URDF:
+    package: agrirover_description
+    relative_path: urdf/robots/arm.urdf.xacro
+  SRDF:
+    relative_path: config/agrirover/arm.srdf
+  CONFIG:
+    author_name: pranav
+    author_email: pranav.p0804@gmail.com
+    generated_timestamp: 1734048000

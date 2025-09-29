@@ -13,7 +13,7 @@ find_package(urdf_tutorial REQUIRED)
 # find_package(<dependency> REQUIRED)
 
 install (
-  DIRECTORY meshes urdf
+  DIRECTORY meshes urdf launch src
   DESTINATION share/${PROJECT_NAME}
 )
 

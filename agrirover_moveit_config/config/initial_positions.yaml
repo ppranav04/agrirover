@@ -1,0 +1,8 @@
+# Default initial position for each movable joint
+initial_positions:
+  base_to_link_0: 0.0
+  link_0_to_link_1: 0.0
+  link_1_to_link_2: 0.0
+  link_2_to_gripper: 0.0
+  finger_1_joint: 0.0
+

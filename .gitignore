@@ -1,0 +1,7 @@
+agrirover_gazebo/
+build/
+devel/
+log/
+*.pyc
+*.swp
+

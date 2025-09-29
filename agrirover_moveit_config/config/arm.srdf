@@ -1,0 +1,110 @@
+<?xml version="1.0"?>
+
+<robot name="arm">
+
+  <!-- Define the virtual fixed joint linking the world to the base -->
+  <virtual_joint name="world_to_base" type="fixed" parent_frame="world" child_link="base_link"/>
+
+  <!-- Define the arm joint group -->
+  <group name="arm">
+    <joint name="base_to_link_0"/>
+    <joint name="link_0_to_link_1"/>
+    <joint name="link_1_to_link_2"/>
+    <joint name="link_2_to_gripper"/>
+  </group>
+
+  <!-- Define the gripper joint group -->
+  <group name="gripper">
+    <joint name="finger_1_joint"/>
+  </group>
+  
+  <group name="arm_with_gripper">
+  	<joint name="base_to_link_0"/>
+  	<joint name="link_0_to_link_1"/>
+  	<joint name="link_1_to_link_2"/>
+  	<joint name="link_2_to_gripper"/>
+  	<joint name="finger_1_joint"/>
+  </group>
+  
+
+  <!-- End effectors can be defined, specify gripper as end effector -->
+  <end_effector name="end_effector_link" group="gripper" parent_link="gripper"/>
+
+    <group_state name="home" group="arm">
+        <joint name="base_to_link_0" value="0"/>
+        <joint name="link_0_to_link_1" value="0"/>
+        <joint name="link_1_to_link_2" value="0"/>
+        <joint name="link_2_to_gripper" value="0"/>
+    </group_state>
+
+    <group_state name="ready" group="arm">
+        <joint name="base_to_link_0" value="0"/>
+        <joint name="link_0_to_link_1" value="0"/>
+        <joint name="link_1_to_link_2" value="1.5708"/>
+        <joint name="link_2_to_gripper" value="0.75"/>
+    </group_state>
+
+    <group_state name="open" group="gripper">
+    	<joint name="finger_1_joint" value="0.5"/>
+    	
+
+    </group_state>
+
+    <group_state name="half_closed" group="gripper">
+    	<joint name="finger_1_joint" value="0.3"/>
+    	
+
+    </group_state>
+
+    <group_state name="closed" group="gripper">
+    	<joint name="finger_1_joint" value="-0.1"/>
+    	
+
+    </group_state>
+
+    <group_state name="home" group="arm_with_gripper">
+        <joint name="base_to_link_0" value="0"/>
+        <joint name="link_0_to_link_1" value="0"/>
+        <joint name="link_1_to_link_2" value="0"/>
+        <joint name="link_2_to_gripper" value="0"/>
+        <joint name="finger_1_joint" value="0"/>
+  	
+    </group_state>
+
+    <group_state name="ready" group="arm_with_gripper">
+        <joint name="base_to_link_0" value="0"/>
+        <joint name="link_0_to_link_1" value="1.5"/>
+        <joint name="link_1_to_link_2" value="1.5"/>
+        <joint name="link_2_to_gripper" value="0"/>
+        <joint name="finger_1_joint" value="0"/>
+  	
+    </group_state>
+
+    <!--
+      Pairs of links in the robot model for which collision checking should be disabled
+      during motion planning and simulation.
+
+      Adjacent: Collision checking is unnecessary because the links are always in contact.
+
+      Never: Collision checking is unnecessary because the robotic arm is designed in a way that
+        they will never collide with each other.
+    -->
+    
+    
+    <disable_collisions link1="base_link" link2="arm_link_0" reason="Adjacent"/>
+    <disable_collisions link1="arm_link_0" link2="arm_link_1" reason="Adjacent"/>
+    <disable_collisions link1="arm_link_1" link2="arm_link_2" reason="Adjacent"/>
+    <disable_collisions link1="arm_link_2" link2="gripper" reason="Adjacent"/>
+    <disable_collisions link1="gripper" link2="finger_1" reason="Adjacent"/>
+    <disable_collisions link1="gripper" link2="finger_2" reason="Adjacent"/>
+    <disable_collisions link1="gripper" link2="finger_3" reason="Adjacent"/>
+    
+    
+    
+    <disable_collisions link1="base_link" link2="arm_link_1" reason="Never"/>    
+    <disable_collisions link1="base_link" link2="arm_link_2" reason="Never"/>
+    <disable_collisions link1="arm_link_0" link2="arm_link_2" reason="Never"/>
+    <disable_collisions link1="finger_1" link2="arm_link_1" reason="Never"/>
+
+</robot>
+

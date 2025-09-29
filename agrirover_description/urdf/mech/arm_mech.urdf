@@ -1,0 +1,259 @@
+<?xml version="1.0"?>
+<robot name="arm">
+
+<!-- Base Link -->
+  <link name="base_link">
+    <inertial>
+      <mass value="5.0"/>
+      <origin xyz="0 0 0" rpy="0 0 0"/>
+      <inertia ixx="0.1" ixy="0.0" ixz="0.0" iyy="0.1" iyz="0.0" izz="0.1"/>
+    </inertial>
+    <visual>
+      <geometry>
+        <mesh filename="package://agrirover_description/meshes/Base.stl" scale="0.001 0.001 0.001"/>
+      </geometry>
+      <material name="gray">
+        <color rgba="0.6 0.6 0.6 1"/>
+      </material>
+    </visual>
+    <collision>
+      <geometry>
+        <mesh filename="package://agrirover_description/meshes/Base_simplified.stl" scale="0.001 0.001 0.001"/>
+      </geometry>
+      <origin xyz="0 0 0" rpy="0 0 0"/>
+    </collision>
+  </link>
+
+<!-- Arm Link 0 -->
+  <link name="arm_link_0">
+    <inertial>
+      <mass value="3.0"/>
+      <origin xyz="0 0 0" rpy="0 0 0"/>
+      <inertia ixx="0.05" ixy="0.0" ixz="0.0" iyy="0.05" iyz="0.0" izz="0.05"/>
+    </inertial>
+    <visual>
+      <geometry>
+        <mesh filename="package://agrirover_description/meshes/Link_0.stl" scale="0.001 0.001 0.001"/>
+      </geometry>
+      <material name="blue">
+        <color rgba="0 0 1 1"/>
+      </material>
+    </visual>
+    <collision>
+      <geometry>
+        <mesh filename="package://agrirover_description/meshes/Link_0_simplified.stl" scale="0.001 0.001 0.001"/>
+      </geometry>
+      <origin xyz="0 0 0" rpy="0 0 0"/>
+    </collision>
+  </link>
+
+<!-- Arm Link 1 -->
+  <link name="arm_link_1">
+    <inertial>
+      <mass value="2.0"/>
+      <origin xyz="0 0 0" rpy="0 0 0"/>
+      <inertia ixx="0.03" ixy="0.0" ixz="0.0" iyy="0.03" iyz="0.0" izz="0.03"/>
+    </inertial>
+    <visual>
+      <geometry>
+        <mesh filename="package://agrirover_description/meshes/Link_1.stl" scale="0.001 0.001 0.001"/>
+      </geometry>
+      <material name="blue">
+        <color rgba="0 0 1 1"/>
+      </material>
+    </visual>
+    <collision>
+      <geometry>
+        <mesh filename="package://agrirover_description/meshes/Link_1.stl" scale="0.001 0.001 0.001"/>
+      </geometry>
+      <origin xyz="0 0 0" rpy="0 0 0"/>
+    </collision>
+  </link>
+
+<!-- Arm Link 2 -->
+  <link name="arm_link_2">
+    <inertial>
+      <mass value="1.5"/>
+      <origin xyz="0 0 0" rpy="0 0 0"/>
+      <inertia ixx="0.02" ixy="0.0" ixz="0.0" iyy="0.02" iyz="0.0" izz="0.02"/>
+    </inertial>
+    <visual>
+      <geometry>
+        <mesh filename="package://agrirover_description/meshes/Link_2.stl" scale="0.001 0.001 0.001"/>
+      </geometry>
+      <material name="blue">
+        <color rgba="0 0 1 1"/>
+      </material>
+    </visual>
+    <collision>
+      <geometry>
+        <mesh filename="package://agrirover_description/meshes/Link_2_simplified.stl" scale="0.001 0.001 0.001"/>
+      </geometry>
+      <origin xyz="0 0 0" rpy="0 0 0"/>
+    </collision>
+  </link>
+
+<!-- World Link -->
+  <link name="world"/>
+
+  <!-- World to Base Joint -->
+  <joint name="world_to_base" type="fixed">
+    <parent link="world"/>
+    <child link="base_link"/>
+    <origin xyz="0 0 0" rpy="0 0 0"/>
+  </joint>
+
+<!-- Gripper Base -->
+  <link name="gripper">
+    <inertial>
+      <mass value="0.5"/>
+      <origin xyz="0 0 0" rpy="0 0 0"/>
+      <inertia ixx="0.005" ixy="0.0" ixz="0.0" iyy="0.005" iyz="0.0" izz="0.005"/>
+    </inertial>
+    <visual>
+      <geometry>
+        <mesh filename="package://agrirover_description/meshes/gripper.stl" scale="0.001 0.001 0.001"/>
+      </geometry>
+      <material name="gray">
+        <color rgba="0.6 0.6 0.6 1"/>
+      </material>
+    </visual>
+    <collision>
+      <geometry>
+        <mesh filename="package://agrirover_description/meshes/gripper_simplified.stl" scale="0.001 0.001 0.001"/>
+      </geometry>
+    </collision>
+  </link>
+
+<!-- Finger 1 -->
+  <link name="finger_1">
+    <inertial>
+      <mass value="0.1"/>
+      <origin xyz="0 0 0" rpy="0 0 0"/>
+      <inertia ixx="0.001" ixy="0.0" ixz="0.0" iyy="0.001" iyz="0.0" izz="0.001"/>
+    </inertial>
+    <visual>
+      <geometry>
+        <mesh filename="package://agrirover_description/meshes/finger.stl" scale="0.001 0.001 0.001"/>
+      </geometry>
+      <material name="blue">
+        <color rgba="0 0 1 1"/>
+      </material>
+    </visual>
+    <collision>
+      <geometry>
+        <mesh filename="package://agrirover_description/meshes/finger.stl" scale="0.001 0.001 0.001"/>
+      </geometry>
+    </collision>
+  </link>
+
+<!-- Finger 2 -->
+  <link name="finger_2">
+    <inertial>
+      <mass value="0.1"/>
+      <origin xyz="0 0 0" rpy="0 0 0"/>
+      <inertia ixx="0.001" ixy="0.0" ixz="0.0" iyy="0.001" iyz="0.0" izz="0.001"/>
+    </inertial>
+    <visual>
+      <geometry>
+        <mesh filename="package://agrirover_description/meshes/finger.stl" scale="0.001 0.001 0.001"/>
+      </geometry>
+      <material name="blue">
+        <color rgba="0 0 1 1"/>
+      </material>
+    </visual>
+    <collision>
+      <geometry>
+        <mesh filename="package://agrirover_description/meshes/finger.stl" scale="0.001 0.001 0.001"/>
+      </geometry>
+    </collision>
+  </link>
+
+<!-- Finger 3 -->
+  <link name="finger_3">
+    <inertial>
+      <mass value="0.1"/>
+      <origin xyz="0 0 0" rpy="0 0 0"/>
+      <inertia ixx="0.001" ixy="0.0" ixz="0.0" iyy="0.001" iyz="0.0" izz="0.001"/>
+    </inertial>
+    <visual>
+      <geometry>
+        <mesh filename="package://agrirover_description/meshes/finger.stl" scale="0.001 0.001 0.001"/>
+      </geometry>
+      <material name="blue">
+        <color rgba="0 0 1 1"/>
+      </material>
+    </visual>
+    <collision>
+      <geometry>
+        <mesh filename="package://agrirover_description/meshes/finger.stl" scale="0.001 0.001 0.001"/>
+      </geometry>
+    </collision>
+  </link>
+
+<!-- Mimic Finger 2 Joint -->
+  <joint name="finger_2_joint" type="revolute">
+    <parent link="gripper"/>
+    <child link="finger_2"/>
+    <origin xyz="-0.0085 0.08 0.015" rpy="3.14 -2.0944 0"/>
+    <axis xyz="0 0 1"/>
+    <limit effort="10.0" velocity="1.0" lower="-0.5" upper="0.5"/>
+    <mimic joint="finger_1_joint" multiplier="1" offset="0"/>
+  </joint>
+
+<!-- Mimic Finger 3 Joint -->
+  <joint name="finger_3_joint" type="revolute">
+    <parent link="gripper"/>
+    <child link="finger_3"/>
+    <origin xyz="-0.0085 0.08 -0.015" rpy="3.14 2.0944 0"/>
+    <axis xyz="0 0 1"/>
+    <limit effort="10.0" velocity="1.0" lower="-0.5" upper="0.5"/>
+    <mimic joint="finger_1_joint" multiplier="1" offset="0"/>
+  </joint>
+
+<!-- Base to arm_link_0 Joint -->
+  <joint name="base_to_link_0" type="revolute">
+    <parent link="base_link"/>
+    <child link="arm_link_0"/>
+    <origin xyz="0 0 0.03" rpy="0 0 1.57"/>
+    <axis xyz="0 0 1"/>
+    <limit effort="10.0" velocity="1.0" lower="-1.57" upper="1.57"/>
+  </joint>
+
+<!-- arm_link_0 to arm_link_1 Joint -->
+  <joint name="link_0_to_link_1" type="revolute">
+    <parent link="arm_link_0"/>
+    <child link="arm_link_1"/>
+    <origin xyz="0 0 0.05" rpy="1.57 0 3.14"/>
+    <axis xyz="0 0 1"/>
+    <limit effort="10.0" velocity="1.0" lower="-1.57" upper="1.57"/>
+  </joint>
+
+<!-- arm_link_1 to arm_link_2 Joint -->
+  <joint name="link_1_to_link_2" type="revolute">
+    <parent link="arm_link_1"/>
+    <child link="arm_link_2"/>
+    <origin xyz="0 0.176 0" rpy="0 0 0"/>
+    <axis xyz="0 0 1"/>
+    <limit effort="10.0" velocity="1.0" lower="-2.0944" upper="2.0944"/>
+  </joint>
+
+<!-- arm_link_2 to gripper Joint -->
+  <joint name="link_2_to_gripper" type="revolute">
+    <parent link="arm_link_2"/>
+    <child link="gripper"/>
+    <origin xyz="0 0.155 0" rpy="0 0 0"/>
+    <axis xyz="0 0 1"/>
+    <limit effort="10.0" velocity="1.0" lower="-1.57" upper="1.57"/>
+  </joint>
+
+<!-- finger_1 Joint -->
+  <joint name="finger_1_joint" type="revolute">
+    <parent link="gripper"/>
+    <child link="finger_1"/>
+    <origin xyz="0.02 0.08 -0.001" rpy="3.14 0 0"/>
+    <axis xyz="0 0 1"/>
+    <limit effort="10.0" velocity="1.0" lower="-0.15" upper="0.8"/>
+  </joint>
+
+</robot>
