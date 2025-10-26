@@ -1,0 +1,9 @@
+tomato_detection_camera_node:
+  ros__parameters:
+    camera_type: 'webcam'  # Change to 'realsense' when using RealSense or it's 'webcam'
+    camera_id: 0
+    z_distance: 0.5  # Default depth in meters (for webcam)
+    model_path: '/home/pranav/agrirover_ws/src/yolov8n_tomato.pt'  # Path to the trained YOLOv8 model
+    confidence_threshold: 0.5
+    image_width: 640
+    image_height: 480
