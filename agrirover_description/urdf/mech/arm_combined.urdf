@@ -1,7 +1,5 @@
-<?xml version="1.0"?>
-<robot name="arm">
-
-<!-- Base Link -->
+<?xml version="1.0" ?>
+<robot name="agrirover">
   <link name="base_link">
     <inertial>
       <mass value="5.0"/>
@@ -23,8 +21,6 @@
       <origin xyz="0 0 0" rpy="0 0 0"/>
     </collision>
   </link>
-
-<!-- Arm Link 0 -->
   <link name="arm_link_0">
     <inertial>
       <mass value="3.0"/>
@@ -46,8 +42,6 @@
       <origin xyz="0 0 0" rpy="0 0 0"/>
     </collision>
   </link>
-
-<!-- Arm Link 1 -->
   <link name="arm_link_1">
     <inertial>
       <mass value="2.0"/>
@@ -69,8 +63,6 @@
       <origin xyz="0 0 0" rpy="0 0 0"/>
     </collision>
   </link>
-
-<!-- Arm Link 2 -->
   <link name="arm_link_2">
     <inertial>
       <mass value="1.5"/>
@@ -93,11 +85,9 @@
     </collision>
   </link>
 
-<!-- World Link -->
-  <link name="world"/>
-
-
-<!-- Gripper Base -->
+  <link name="world">
+  </link>
+  
   <link name="gripper">
     <inertial>
       <mass value="0.5"/>
@@ -118,8 +108,6 @@
       </geometry>
     </collision>
   </link>
-
-<!-- Finger 1 -->
   <link name="finger_1">
     <inertial>
       <mass value="0.1"/>
@@ -140,8 +128,6 @@
       </geometry>
     </collision>
   </link>
-
-<!-- Finger 2 -->
   <link name="finger_2">
     <inertial>
       <mass value="0.1"/>
@@ -162,8 +148,6 @@
       </geometry>
     </collision>
   </link>
-
-<!-- Finger 3 -->
   <link name="finger_3">
     <inertial>
       <mass value="0.1"/>
@@ -184,16 +168,11 @@
       </geometry>
     </collision>
   </link>
-
-<!-- World to Base Joint -->
   <joint name="world_to_base" type="fixed">
     <parent link="world"/>
     <child link="base_link"/>
     <origin xyz="0 0 0" rpy="0 0 0"/>
   </joint>
-
-
-<!-- Base to arm_link_0 Joint -->
   <joint name="base_to_link_0" type="revolute">
     <parent link="base_link"/>
     <child link="arm_link_0"/>
@@ -201,8 +180,6 @@
     <axis xyz="0 0 1"/>
     <limit effort="10.0" velocity="1.0" lower="0" upper="3.14"/>
   </joint>
-
-<!-- arm_link_0 to arm_link_1 Joint -->
   <joint name="link_0_to_link_1" type="revolute">
     <parent link="arm_link_0"/>
     <child link="arm_link_1"/>
@@ -210,8 +187,6 @@
     <axis xyz="0 0 1"/>
     <limit effort="10.0" velocity="1.0" lower="0" upper="3.14"/>
   </joint>
-
-<!-- arm_link_1 to arm_link_2 Joint -->
   <joint name="link_1_to_link_2" type="revolute">
     <parent link="arm_link_1"/>
     <child link="arm_link_2"/>
@@ -219,8 +194,6 @@
     <axis xyz="0 0 1"/>
     <limit effort="10.0" velocity="1.0" lower="0" upper="3.14"/>
   </joint>
-
-<!-- arm_link_2 to gripper Joint -->
   <joint name="link_2_to_gripper" type="revolute">
     <parent link="arm_link_2"/>
     <child link="gripper"/>
@@ -228,8 +201,6 @@
     <axis xyz="0 0 1"/>
     <limit effort="10.0" velocity="1.0" lower="0" upper="3.14"/>
   </joint>
-
-<!-- finger_1 Joint -->
   <joint name="finger_1_joint" type="revolute">
     <parent link="gripper"/>
     <child link="finger_1"/>
@@ -237,21 +208,114 @@
     <axis xyz="0 0 1"/>
     <limit effort="10.0" velocity="1.0" lower="0" upper="0.9"/>
   </joint>
-
-  <!-- Mimic Finger 2 Joint -->
   <joint name="finger_2_joint" type="fixed">
     <parent link="gripper"/>
     <child link="finger_2"/>
     <origin xyz="-0.0085 0.08 0.015" rpy="3.14 -2.0944 0"/>
-    <axis xyz="0 0 1"/>  </joint>
-
-<!-- Mimic Finger 3 Joint -->
+    <axis xyz="0 0 1"/>
+  </joint>
   <joint name="finger_3_joint" type="fixed">
     <parent link="gripper"/>
     <child link="finger_3"/>
     <origin xyz="-0.0085 0.08 -0.015" rpy="3.14 2.0944 0"/>
     <axis xyz="0 0 1"/>
   </joint>
+  <link name="camera_head_link">
+    <visual>
+      <origin xyz="0 0 0" rpy="1.5707963267948966 0.0 1.5707963267948966"/>
+      <geometry>
+        <mesh filename="package://agrirover_description/meshes/d435/visual/d435.stl"/>
+      </geometry>
+      <material name="aluminum">
+        <color rgba="0.5 0.5 0.5 1"/>
+      </material>
+    </visual>
+    <collision>
+      <origin xyz="0 0 0" rpy="0 0 0"/>
+      <geometry>
+        <box size="0.02505 0.090 0.025"/>
+      </geometry>
+    </collision>
+    <inertial>
+      <mass value="0.072"/>
+      <origin xyz="0 0 0"/>
+      <inertia ixx="0.003881243" ixy="0.0" ixz="0.0" iyy="0.000498940" iyz="0.0" izz="0.003879257"/>
+    </inertial>
+  </link>
+  <joint name="camera_head_depth_joint" type="fixed">
+    <origin xyz="0 0 0" rpy="0 0 0"/>
+    <parent link="camera_head_link"/>
+    <child link="camera_head_depth_frame"/>
+  </joint>
+  <link name="camera_head_depth_frame"/>
+  <joint name="camera_head_depth_optical_joint" type="fixed">
+    <origin xyz="0 0 0" rpy="-1.5707963267948966 0 -1.5707963267948966"/>
+    <parent link="camera_head_depth_frame"/>
+    <child link="camera_head_depth_optical_frame"/>
+  </joint>
+  <link name="camera_head_depth_optical_frame"/>
+  <joint name="camera_head_infra1_joint" type="fixed">
+    <origin xyz="0 0.0 0" rpy="0 0 0"/>
+    <parent link="camera_head_link"/>
+    <child link="camera_head_infra1_frame"/>
+  </joint>
+  <link name="camera_head_infra1_frame"/>
+  <joint name="camera_head_infra1_optical_joint" type="fixed">
+    <origin xyz="0 0 0" rpy="-1.5707963267948966 0 -1.5707963267948966"/>
+    <parent link="camera_head_infra1_frame"/>
+    <child link="camera_head_infra1_optical_frame"/>
+  </joint>
+  <link name="camera_head_infra1_optical_frame"/>
+  <joint name="camera_head_infra2_joint" type="fixed">
+    <origin xyz="0 -0.050 0" rpy="0 0 0"/>
+    <parent link="camera_head_link"/>
+    <child link="camera_head_infra2_frame"/>
+  </joint>
+  <link name="camera_head_infra2_frame"/>
+  <joint name="camera_head_infra2_optical_joint" type="fixed">
+    <origin xyz="0 0 0" rpy="-1.5707963267948966 0 -1.5707963267948966"/>
+    <parent link="camera_head_infra2_frame"/>
+    <child link="camera_head_infra2_optical_frame"/>
+  </joint>
+  <link name="camera_head_infra2_optical_frame"/>
+  <joint name="camera_head_color_joint" type="fixed">
+    <origin xyz="0 0.015 0" rpy="0 0 0"/>
+    <parent link="camera_head_link"/>
+    <child link="camera_head_color_frame"/>
+  </joint>
+  <link name="camera_head_color_frame"/>
+  <joint name="camera_head_color_optical_joint" type="fixed">
+    <origin xyz="0 0 0" rpy="-1.5707963267948966 0 -1.5707963267948966"/>
+    <parent link="camera_head_color_frame"/>
+    <child link="camera_head_color_optical_frame"/>
+  </joint>
+  <link name="camera_head_color_optical_frame"/>
+  <gazebo reference="camera_head_link">
+    <sensor name="camera_head" type="rgbd_camera">
+      <camera>
+        <horizontal_fov>1.5184</horizontal_fov>
+        <image>
+          <width>424</width>
+          <height>240</height>
+        </image>
+        <clip>
+          <near>0.05</near>
+          <far>1.5</far>
+        </clip>
+      </camera>
+      <always_on>1</always_on>
+      <gz_frame_id>camera_head_link</gz_frame_id>
+      <topic>camera_head</topic>
+      <update_rate>5</update_rate>
+      <visualize>true</visualize>
+    </sensor>
+  </gazebo>
+  <joint name="gripper_to_camera" type="fixed">
+    <parent link="gripper"/>
+    <child link="camera_head_link"/>
+    <origin xyz="-0.025 0.02 0" rpy="-1.57 0 1.57"/>
+  </joint>
+
 
 
 </robot>

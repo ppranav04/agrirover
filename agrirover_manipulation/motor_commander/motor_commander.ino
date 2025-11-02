@@ -1,7 +1,7 @@
 #include <Servo.h>
 
 Servo servos[5];                // Array for 5 servos
-const int servoPins[5] = {3, 5, 6, 9, 10}; // PWM pins where servos are connected
+const int servoPins[5] = {3, 6, 9, 10}; // PWM pins where servos are connected
 
 const byte numServos = 5;
 const byte maxLength = 64;
@@ -16,7 +16,7 @@ void setup() {
   Serial.println("Ready to receive servo angles");
 }
 
-void loop() {
+void loop() { 
   while (Serial.available() > 0) {
     char inChar = Serial.read();
 
@@ -33,7 +33,7 @@ void loop() {
 
 void processCommand(char* command) {
   int values[numServos];
-  byte index = 0;
+  byte index = 0; 
 
   char* token = strtok(command, ",");
   while (token != NULL && index < numServos) {
@@ -42,10 +42,11 @@ void processCommand(char* command) {
   }
 
   if (index == numServos) {
-    // Move servos and print values
+    // Move servos and print complementary angles
     Serial.print("Servo angles: ");
     for (byte i = 0; i < numServos; i++) {
       int angle = constrain(values[i], 0, 180);
+      angle = 180 - angle;  // Complementary angle
       servos[i].write(angle);
       Serial.print(angle);
       if (i < numServos - 1) Serial.print(", ");

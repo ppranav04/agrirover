@@ -2,7 +2,13 @@
 <robot name="agrirover" xmlns:xacro="http://www.ros.org/wiki/xacro">
 
   <xacro:include filename="$(find agrirover_description)/urdf/mech/arm_mech.urdf"/>
-  <xacro:include filename="$(find agrirover_description)/urdf/control/agrirover_ros2_control.urdf.xacro"/>
+  <xacro:include filename="$(find agrirover_description)/urdf/sensors/intel_rgbd_cam_d435.urdf.xacro"/>
   
+  <joint name="gripper_to_camera" type="fixed">
+  <parent link="gripper"/>
+  <child link="camera_head_link"/>
+  <origin xyz="-0.025 0.02 0" rpy="1.57 0 -1.57"/>
+  </joint>
+
 </robot>
 

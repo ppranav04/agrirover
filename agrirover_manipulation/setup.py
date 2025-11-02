@@ -20,6 +20,7 @@ setup(
             'visualization_node = agrirover_manipulation.visualization_node:main',
             'robot_state_publisher_node = agrirover_manipulation.robot_state_publisher_node:main',
             'interactive_marker_server = agrirover_manipulation.interactive_marker_server:main',
+            'goal_pose_input = agrirover_manipulation.goal_pose_input:main',
         ],
     },
 )
