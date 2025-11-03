@@ -1,7 +1,8 @@
 #!/usr/bin/env python3
 """
-Improved IK Solver Node for 5-DOF Agricultural Robot Arm
+IK Solver Node for 3-DOF TRR Agricultural Robot Arm
 Features:
+- Adapted for 3-DOF arm kinematics (+ 1 gripper servo)
 - Better transform handling with proper error checking
 - Joint limit enforcement and validation
 - Solution quality assessment (manipulability, distance to limits)
@@ -12,6 +13,7 @@ Features:
 - State machine for safer operation
 """
 
+
 import rclpy
 from rclpy.node import Node
 from rclpy.duration import Duration
@@ -21,10 +23,12 @@ import numpy as np
 import os
 from typing import List
 
+
 import tf2_ros
 from tf2_geometry_msgs import do_transform_point
 from ament_index_python.packages import get_package_share_directory
 from ikpy.chain import Chain
+
 
 
 class RobotState:
@@ -37,6 +41,7 @@ class RobotState:
     ERROR = "ERROR"
 
 
+
 class IKSolution:
     """Container for IK solution with quality metrics"""
     def __init__(self, joint_angles: np.ndarray, manipulability: float,
@@ -46,29 +51,35 @@ class IKSolution:
         self.distance_to_limits = distance_to_limits
         self.end_effector_error = end_effector_error
 
+
     def quality_score(self) -> float:
         """Compute overall quality score (higher is better)"""
         w_manip = 0.4
         w_limits = 0.4
         w_error = 0.2
 
+
         return (w_manip * self.manipulability +
                 w_limits * self.distance_to_limits -
                 w_error * self.end_effector_error)
+
 
 
 class ImprovedIKSolverNode(Node):
     def __init__(self):
         super().__init__('improved_ik_solver_node')
 
+
         # Declare parameters
-        self.declare_parameter('home_position', [1.57, 1.57, 0.9, 0.8, 0.0])
+        # FIXED: 4 angles - 3 arm joints + 1 gripper
+        self.declare_parameter('home_position', [1.57, 0.0, 3.14, 3.14])
         self.declare_parameter('tf_timeout', 2.0)
         self.declare_parameter('ik_timeout', 1.0)
         self.declare_parameter('max_ik_iterations', 100)
         self.declare_parameter('position_tolerance', 0.01)  # 1cm
         self.declare_parameter('num_ik_solutions', 5)
         self.declare_parameter('manipulability_threshold', 0.01)
+
 
         self.home_position = self.get_parameter('home_position').value
         self.tf_timeout = self.get_parameter('tf_timeout').value
@@ -78,38 +89,46 @@ class ImprovedIKSolverNode(Node):
         self.num_ik_solutions = self.get_parameter('num_ik_solutions').value
         self.manipulability_threshold = self.get_parameter('manipulability_threshold').value
 
+
         # TF2 Setup
         self.tf_buffer = tf2_ros.Buffer(cache_time=Duration(seconds=30.0))
         self.tf_listener = tf2_ros.TransformListener(self.tf_buffer, self)
+
 
         # Frame names
         self.arm_base_frame = "base_link"
         self.camera_frame = "camera_head_link"
         self.end_effector_frame = "gripper"
 
+
         # State tracking
         self.current_state = RobotState.WAITING_FOR_TRANSFORMS
         self.transforms_ready = False
-        self.last_valid_joints = np.array(self.home_position)
+        # FIXED: Only 3 arm joints for IK solving (ignore gripper in IK)
+        self.last_valid_joints = np.array(self.home_position[:3])
 
-        # Joint limits (from URDF)
+
+        # Joint limits (from URDF) - 3 DOF arm + gripper
+        # Note: Only first 3 are for IK, 4th is gripper
         self.joint_limits = np.array([
-            [0.0, 3.14],  # Joint 1
-            [0.0, 3.14],  # Joint 2
-            [0.0, 3.14],  # Joint 3
-            [0.0, 3.14],  # Joint 4
-            [0.0, 0.9]    # Gripper
+            [0.0, 3.14],  # Joint 1 (Base rotation)
+            [0.0, 3.14],  # Joint 2 (Shoulder)
+            [0.0, 3.14],  # Joint 3 (Elbow)
+            [0.0, 0.9]    # Gripper (not used in IK)
         ])
 
-        # Workspace bounds (approximate)
+
+        # Workspace bounds (approximate for 3-DOF TRR)
         self.workspace_bounds = {
             'x': [-0.5, 0.5],
             'y': [-0.5, 0.5],
             'z': [0.0, 0.8]
         }
 
+
         # Publishers
         self.servo_publisher = self.create_publisher(Float32MultiArray, 'servo_angles', 10)
+
 
         # Subscribers
         self.pose_subscriber = self.create_subscription(
@@ -125,6 +144,7 @@ class ImprovedIKSolverNode(Node):
             10
         )
 
+
         # Initialize IK solver chain
         try:
             package_path = get_package_share_directory('agrirover_description')
@@ -136,22 +156,28 @@ class ImprovedIKSolverNode(Node):
             self.current_state = RobotState.ERROR
             return
 
+
         # Timer to check transforms and publish home position
         self.startup_timer = self.create_timer(0.5, self.startup_callback)
         self.startup_attempts = 0
         self.max_startup_attempts = 20
 
+
         self.get_logger().info('═══════════════════════════════════════')
-        self.get_logger().info('  Improved IK Solver Node Initialized')
+        self.get_logger().info('  Improved IK Solver Node (3-DOF TRR)')
         self.get_logger().info('═══════════════════════════════════════')
         self.get_logger().info(f'Home position: {self.home_position}')
-        self.get_logger().info(f'Joint limits: \n{self.joint_limits}')
+        self.get_logger().info(f'IK Joints (3): 1(base), 2(shoulder), 3(elbow)')
+        self.get_logger().info(f'Gripper servo: 4 (independent)')
+        self.get_logger().info(f'Joint limits (IK): \n{self.joint_limits[:3]}')
         self.get_logger().info('Waiting for transforms...')
+
 
     def startup_callback(self):
         if self.transforms_ready:
             return
         self.startup_attempts += 1
+
 
         try:
             can_transform = self.tf_buffer.can_transform(
@@ -174,6 +200,7 @@ class ImprovedIKSolverNode(Node):
         except Exception as e:
             self.get_logger().debug(f'Waiting for transforms: {e}')
 
+
     def is_in_workspace(self, position: List[float]) -> bool:
         x, y, z = position
         in_bounds = (
@@ -185,74 +212,89 @@ class ImprovedIKSolverNode(Node):
             self.get_logger().warn(f'⚠ Target [{x:.3f}, {y:.3f}, {z:.3f}] outside workspace bounds')
         return in_bounds
 
+
     def validate_joint_angles(self, joint_angles: np.ndarray) -> bool:
-        if len(joint_angles) != 5:
+        """Validate only the 3 arm joints (ignore gripper for IK validation)"""
+        if len(joint_angles) < 3:
             return False
-        for i, angle in enumerate(joint_angles):
-            if not (self.joint_limits[i][0] <= angle <= self.joint_limits[i][1]):
-                self.get_logger().warn(f'⚠ Joint {i+1} angle {angle:.3f} outside limits [{self.joint_limits[i][0]:.3f}, {self.joint_limits[i][1]:.3f}]')
+        # Check only first 3 joints (arm joints)
+        for i in range(3):
+            if not (self.joint_limits[i][0] <= joint_angles[i] <= self.joint_limits[i][1]):
+                self.get_logger().warn(f'⚠ Joint {i+1} angle {joint_angles[i]:.3f} outside limits [{self.joint_limits[i][0]:.3f}, {self.joint_limits[i][1]:.3f}]')
                 return False
         return True
 
+
     def compute_manipulability(self, joint_angles: np.ndarray) -> float:
+        """Compute manipulability for 3-DOF arm"""
         try:
-            full_angles = np.insert(joint_angles, 0, 0.0)
-            fk_matrix = self.chain.forward_kinematics(full_angles)
+            # Use only first 3 joint angles
+            arm_angles = joint_angles[:3]
+            
             center_distances = []
-            for i, angle in enumerate(joint_angles):
+            for i in range(3):
                 center = (self.joint_limits[i][0] + self.joint_limits[i][1]) / 2
                 range_val = self.joint_limits[i][1] - self.joint_limits[i][0]
-                normalized_dist = abs(angle - center) / (range_val / 2)
+                normalized_dist = abs(arm_angles[i] - center) / (range_val / 2)
                 center_distances.append(1.0 - normalized_dist)
             return np.mean(center_distances)
         except Exception as e:
             self.get_logger().warn(f'Failed to compute manipulability: {e}')
             return 0.5
 
+
     def compute_distance_to_limits(self, joint_angles: np.ndarray) -> float:
+        """Compute distance to limits for 3-DOF arm"""
         min_distances = []
-        for i, angle in enumerate(joint_angles):
-            lower_dist = angle - self.joint_limits[i][0]
-            upper_dist = self.joint_limits[i][1] - angle
+        # Only check first 3 joints
+        for i in range(3):
+            lower_dist = joint_angles[i] - self.joint_limits[i][0]
+            upper_dist = self.joint_limits[i][1] - joint_angles[i]
             range_val = self.joint_limits[i][1] - self.joint_limits[i][0]
             min_dist = min(lower_dist, upper_dist) / range_val
             min_distances.append(min_dist)
         return np.min(min_distances)
 
+
     def solve_ik_multiple(self, target_position: List[float]) -> List[IKSolution]:
-        """Solve IK with multiple initial guesses and rank solutions"""
+        """Solve IK with multiple initial guesses and rank solutions
+        
+        For 3-DOF TRR: Only solve for first 3 joints (arm)
+        """
         solutions = []
     
+        # Initial guesses use only 3 arm joints
         initial_guesses = [
             self.last_valid_joints,
-            np.array(self.home_position),
+            np.array(self.home_position[:3]),
         ]
     
+        # Add random perturbations (3 DOF only)
         for _ in range(self.num_ik_solutions - 2):
-            perturbation = np.random.uniform(-0.3, 0.3, size=5)
+            perturbation = np.random.uniform(-0.3, 0.3, size=3)
             guess = np.clip(
                 self.last_valid_joints + perturbation,
-                self.joint_limits[:, 0],
-                self.joint_limits[:, 1]
+                self.joint_limits[:3, 0],
+                self.joint_limits[:3, 1]
             )
             initial_guesses.append(guess)
     
         for idx, initial_guess in enumerate(initial_guesses):
             try:
-                # Solve IK - NO prepending dummy base joint
+                # Solve IK - Use only first 3 DOF
                 ik_result = self.chain.inverse_kinematics(
                     target_position=target_position,
-                    initial_position=initial_guess,  # Use directly
+                    initial_position=initial_guess,
                     max_iter=self.max_ik_iterations
                 )
             
-                # ik_result is already just [j0, j1, j2, j3, j4]
-                joint_solution = ik_result
+                # Extract only the 3 arm joints (ignore any extra)
+                joint_solution = ik_result[:3]
             
-                # FIX: Validate using np.all() for array comparison
+                # Validate using np.all() for array comparison
                 within_bounds = np.all(
-                    (joint_solution >= self.joint_limits[:, 0]) &
-                    (joint_solution <= self.joint_limits[:, 1])
+                    (joint_solution >= self.joint_limits[:3, 0]) &
+                    (joint_solution <= self.joint_limits[:3, 1])
                 )
             
                 if not within_bounds:
@@ -296,19 +338,23 @@ class ImprovedIKSolverNode(Node):
         return solutions
 
 
+
     def goal_pose_callback(self, msg: PoseStamped):
         if self.current_state == RobotState.COMPUTING_IK:
             self.get_logger().warn('⚠ Already computing IK, ignoring new goal')
             return
 
+
         if not self.transforms_ready:
             self.get_logger().warn('⚠ Transforms not ready, ignoring goal')
             return
+
 
         self.current_state = RobotState.COMPUTING_IK
         self.get_logger().info('═══════════════════════════════════════')
         self.get_logger().info('  NEW GOAL RECEIVED')
         self.get_logger().info('═══════════════════════════════════════')
+
 
         try:
             point_camera = PointStamped()
@@ -316,10 +362,12 @@ class ImprovedIKSolverNode(Node):
             point_camera.header.frame_id = self.camera_frame
             point_camera.point = msg.pose.position
 
+
             self.get_logger().info(
                 f'Camera frame input: x={msg.pose.position.x:.3f}, '
                 f'y={msg.pose.position.y:.3f}, z={msg.pose.position.z:.3f}'
             )
+
 
             transform = self.tf_buffer.lookup_transform(
                 target_frame=self.arm_base_frame,
@@ -328,9 +376,12 @@ class ImprovedIKSolverNode(Node):
                 timeout=Duration(seconds=self.tf_timeout)
             )
 
+
             self.get_logger().info('✓ Transform lookup successful')
 
+
             point_base = do_transform_point(point_camera, transform)
+
 
             target_pos = [
                 point_base.point.x,
@@ -338,25 +389,31 @@ class ImprovedIKSolverNode(Node):
                 point_base.point.z
             ]
 
+
             self.get_logger().info(
                 f'Base frame (fully transformed): x={target_pos[0]:.3f}, '
                 f'y={target_pos[1]:.3f}, z={target_pos[2]:.3f}'
             )
+
 
             if not self.is_in_workspace(target_pos):
                 self.get_logger().error('✗ Target outside workspace')
                 self.current_state = RobotState.IDLE
                 return
 
+
             self.get_logger().info('Computing IK solution...')
             solutions = self.solve_ik_multiple(target_pos)
+
 
             if not solutions:
                 self.get_logger().error('✗ No valid IK solution found')
                 self.current_state = RobotState.IDLE
                 return
 
+
             best_solution = solutions[0]
+
 
             self.get_logger().info(f'✓ Found {len(solutions)} valid solution(s)')
             self.get_logger().info(
@@ -365,25 +422,39 @@ class ImprovedIKSolverNode(Node):
                 f'error={best_solution.end_effector_error:.4f}m, '
                 f'manip={best_solution.manipulability:.3f}'
             )
+            
+            # Combine 3 arm joints + gripper servo
+            # Keep gripper position from home_position
+            full_joint_angles = list(best_solution.joint_angles) + [self.home_position[3]]
+            
             self.get_logger().info(
-                f'Joint angles: [{", ".join("{:.3f}".format(a) for a in best_solution.joint_angles)}]'
+                f'Joint angles (arm): [{", ".join("{:.3f}".format(a) for a in best_solution.joint_angles)}]'
+            )
+            self.get_logger().info(
+                f'Gripper servo: {self.home_position[3]:.3f}'
             )
 
+
             msg_out = Float32MultiArray()
-            msg_out.data = [float(a) for a in best_solution.joint_angles]
+            msg_out.data = [float(a) for a in full_joint_angles]
             self.servo_publisher.publish(msg_out)
+
 
             self.last_valid_joints = best_solution.joint_angles
             self.current_state = RobotState.MOVING_TO_TARGET
 
+
             self.get_logger().info('✓ Published servo commands')
             self.get_logger().info('═══════════════════════════════════════')
+
 
             def reset_callback():
                 self._set_idle_state()
                 timer.cancel()
 
+
             timer = self.create_timer(0.5, reset_callback)
+
 
         except tf2_ros.LookupException as e:
             self.get_logger().error(f'✗ Transform lookup failed: {e}')
@@ -394,43 +465,55 @@ class ImprovedIKSolverNode(Node):
             self.get_logger().error(traceback.format_exc())
             self.current_state = RobotState.ERROR
 
+
     def _set_idle_state(self):
         if self.current_state == RobotState.MOVING_TO_TARGET:
             self.current_state = RobotState.IDLE
+
 
     def detection_status_callback(self, msg):  # Make sure this exists
         if not msg.data and self.current_state == RobotState.IDLE:
             self.get_logger().info('No detection - moving to home position')
             self.move_to_home_position()
 
+
     def move_to_home_position(self):
         if self.current_state in [RobotState.COMPUTING_IK, RobotState.MOVING_HOME]:
             return
 
+
         self.current_state = RobotState.MOVING_HOME
+
 
         try:
             msg = Float32MultiArray()
             msg.data = self.home_position
             self.servo_publisher.publish(msg)
 
-            self.last_valid_joints = np.array(self.home_position)
+
+            self.last_valid_joints = np.array(self.home_position[:3])
+
 
             self.get_logger().info(f'✓ Moving to home: {self.home_position}')
+
 
             def reset_home_callback():
                 self._reset_from_home()
                 timer.cancel()
 
+
             timer = self.create_timer(1.0, reset_home_callback)
+
 
         except Exception as e:
             self.get_logger().error(f'✗ Failed to move home: {e}')
             self.current_state = RobotState.ERROR
 
+
     def _reset_from_home(self):
         if self.current_state == RobotState.MOVING_HOME:
             self.current_state = RobotState.IDLE
+
 
 
 def main(args=None):
@@ -443,6 +526,7 @@ def main(args=None):
     finally:
         if rclpy.ok():
             rclpy.shutdown()
+
 
 
 if __name__ == "__main__":

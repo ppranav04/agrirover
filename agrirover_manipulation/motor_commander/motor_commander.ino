@@ -1,7 +1,7 @@
 #include <Servo.h>
 
 Servo servos[5];                // Array for 5 servos
-const int servoPins[5] = {3, 6, 9, 10}; // PWM pins where servos are connected
+const int servoPins[4] = {3, 6, 9, 10}; // PWM pins where servos are connected
 
 const byte numServos = 5;
 const byte maxLength = 64;
@@ -46,7 +46,6 @@ void processCommand(char* command) {
     Serial.print("Servo angles: ");
     for (byte i = 0; i < numServos; i++) {
       int angle = constrain(values[i], 0, 180);
-      angle = 180 - angle;  // Complementary angle
       servos[i].write(angle);
       Serial.print(angle);
       if (i < numServos - 1) Serial.print(", ");

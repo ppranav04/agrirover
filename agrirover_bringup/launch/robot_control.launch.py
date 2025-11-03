@@ -1,11 +1,14 @@
 """
-Improved Launch File for Agricultural Robot Arm Manipulation
+Improved Launch File for Agricultural Robot Arm Manipulation (FIXED)
+- Pin 5 removed: 4 servos on pins 3, 6, 9, 10
+- Updated home position: 4 angles instead of 5
 - Camera attached to gripper (dynamic transform from URDF)
 - Manual goal pose input with xterm visualization
 - RViz marker visualization
 - Improved node sequencing and error handling
 - Configurable parameters
 """
+
 
 from launch import LaunchDescription
 from launch_ros.actions import Node
@@ -24,11 +27,15 @@ import os
 import launch
 
 
+
 def generate_launch_description():
     """
     Launch configuration for agricultural robot arm with manual goal pose input.
     
     Key improvements:
+    - Removed pin 5 servo (no hardware)
+    - 4 servos on pins: 3, 6, 9, 10
+    - Updated home position to 4 angles
     - Removed static TF publisher (camera is attached to gripper via URDF)
     - Better parameter organization
     - Improved logging and startup messaging
@@ -88,10 +95,11 @@ def generate_launch_description():
         description='Path to robot URDF file'
     )
     
+    # FIXED: 4 angles instead of 5
     home_position_arg = DeclareLaunchArgument(
         'home_position',
-        default_value='[1.57, 2.74, 0.0, 0.0, 0.0]',
-        description='Home position joint angles in radians [joint1, joint2, joint3, joint4, gripper]'
+        default_value='[1.57, 0.0, 3.14, 3.14]',
+        description='Home position joint angles in radians [joint1, joint2, joint3, joint4] - 4 servos'
     )
     
     # Movement Parameters
@@ -191,6 +199,7 @@ def generate_launch_description():
     
     # 1. Custom Robot State Publisher
     # Publishes joint states from servo commands
+    # FIXED: Updated for 4 servos
     robot_state_publisher_node = Node(
         package='agrirover_manipulation',
         executable='robot_state_publisher_node',
@@ -256,6 +265,7 @@ def generate_launch_description():
     
     # 4. Serial Motor Commander Node
     # Sends joint commands to hardware or simulation
+    # FIXED: Updated for 4 servos
     serial_motor_commander = Node(
         package='agrirover_manipulation',
         executable='serial_motor_commander',
@@ -353,6 +363,7 @@ def generate_launch_description():
         LogInfo(msg='═══════════════════════════════════════'),
         LogInfo(msg='  Agricultural Robot Arm System'),
         LogInfo(msg='═══════════════════════════════════════'),
+        LogInfo(msg='Servos: 4 (pins 3, 6, 9, 10) - Pin 5 removed'),
         LogInfo(msg='Camera: Attached to gripper (dynamic transform)'),
         LogInfo(msg='Input: Manual goal poses via xterm'),
         LogInfo(msg='Visualization: RViz markers + robot model'),

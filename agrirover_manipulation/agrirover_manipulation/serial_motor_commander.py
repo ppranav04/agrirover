@@ -1,11 +1,14 @@
 #!/usr/bin/env python3
 """
-Enhanced Serial Motor Commander
+Enhanced Serial Motor Commander (FIXED)
+- Pin 5 removed (no hardware)
+- 4 servos on pins: 3, 6, 9, 10
 - Graceful degradation when hardware unavailable
 - Connection retry logic
 - Movement queue management
 - Better error recovery
 """
+
 
 import rclpy
 from rclpy.node import Node
@@ -16,6 +19,7 @@ import time
 import numpy as np
 from threading import Lock, Thread
 from queue import Queue, Empty
+
 
 
 class EnhancedSerialMotorCommander(Node):
@@ -90,6 +94,7 @@ class EnhancedSerialMotorCommander(Node):
         self.get_logger().info(f'Serial port: {self.serial_port}')
         self.get_logger().info(f'Baud rate: {self.baud_rate}')
         self.get_logger().info(f'Hardware enabled: {self.enable_hardware}')
+        self.get_logger().info(f'Servos: 4 (pins: 3, 6, 9, 10)')
         self.get_logger().info(f'Interpolation: {self.interpolation_steps} steps')
         self.get_logger().info(f'Duration: {self.movement_duration}s')
     
@@ -184,6 +189,13 @@ class EnhancedSerialMotorCommander(Node):
         """Handle incoming servo angle commands"""
         target_positions = list(msg.data)
         
+        # Validate: should have 4 servo angles
+        if len(target_positions) != 4:
+            self.get_logger().error(
+                f'Expected 4 servo angles, got {len(target_positions)}'
+            )
+            return
+        
         # Initialize current positions on first command
         if self.current_positions is None:
             self.current_positions = target_positions
@@ -250,7 +262,7 @@ class EnhancedSerialMotorCommander(Node):
                     for angle in position_rad
                 ]
                 
-                # Send command
+                # Send command - 4 servos
                 command_str = ','.join(map(str, angles_deg)) + '\n'
                 
                 with self.connection_lock:
@@ -294,6 +306,7 @@ class EnhancedSerialMotorCommander(Node):
         super().destroy_node()
 
 
+
 def main(args=None):
     rclpy.init(args=args)
     
@@ -305,6 +318,7 @@ def main(args=None):
     finally:
         if rclpy.ok():
             rclpy.shutdown()
+
 
 
 if __name__ == '__main__':
