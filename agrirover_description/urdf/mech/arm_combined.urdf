@@ -183,15 +183,15 @@
   <joint name="link_0_to_link_1" type="revolute">
     <parent link="arm_link_0"/>
     <child link="arm_link_1"/>
-    <origin xyz="0 0 0.05" rpy="1.57 1.57 0"/>
-    <axis xyz="0 0 1"/>
+    <origin xyz="0 0 0.05" rpy="1.57 -1.57 0"/>
+    <axis xyz="0 0 -1"/>
     <limit effort="10.0" velocity="1.0" lower="0" upper="3.14"/>
   </joint>
   <joint name="link_1_to_link_2" type="revolute">
     <parent link="arm_link_1"/>
     <child link="arm_link_2"/>
-    <origin xyz="0 0.176 0" rpy="0 0 -1.57"/>
-    <axis xyz="0 0 1"/>
+    <origin xyz="0 0.176 0" rpy="0 0 1.57"/>
+    <axis xyz="0 0 -1"/>
     <limit effort="10.0" velocity="1.0" lower="0" upper="3.14"/>
   </joint>
   <joint name="link_2_to_gripper" type="revolute">
