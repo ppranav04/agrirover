@@ -1,20 +1,62 @@
-# Agrirover #
+# Agrirover
 
-## Autonomous Mobile Fruit Picking Robot ##
-This project is an autonomous mobile manipulator designed specifically for fruit picking in agricultural environments. It integrates advanced vision-based navigation, real-time object detection, and adaptive gripping technology to identify, locate, and harvest fruits with high accuracy and efficiency.
+### Autonomous Mobile Fruit-Picking Robot
 
-## Project Overview ##
-Autonomous navigation: The robot uses V-SLAM to navigate through orchards or farms, avoiding obstacles while following optimal paths for fruit harvesting.
-Real-time object detection: Implements a novel Multiple-Expert Colour Feature Extreme Learning Machine (MEC-ELM) for fast and precise detection of fruits on trees.
-Adaptive gripping mechanism: Features an end-effector that adapts to different fruit shapes and sizes, minimizing damage during picking.
-Embedded systems and AI integration: Combines edge computing capabilities using Jetson Orin Nano with AI algorithms for on-site processing.
+Semester 7 Project-I (B.Tech Mechatronics and Automation, VIT Chennai)
 
-## Current Status ##
-The perception and manipulator control software development is in development.
-![WhatsApp Image 2025-09-26 at 13 41 41_39cafd42](https://github.com/user-attachments/assets/c8b3d71d-a572-4d9e-9cc7-02a6b7f1b97d)
-![WhatsApp Image 2025-09-26 at 13 42 41_305c4a28](https://github.com/user-attachments/assets/58405bec-53eb-4a77-979f-225aad8f6676)
+Agrirover is an autonomous mobile manipulator built to identify, localize, and harvest tomatoes in unstructured farm environments. The system combines vision-based perception, an articulated manipulator, and a mobile base, with the long-term goal of fully autonomous in-field navigation and picking.
 
+This was my first ground-up robotics systems project — integrating perception, manipulation, and (planned) navigation into a single pipeline — and it's where I ran into the problems that later shaped how I approached [Project Tvastr](#).
 
-## Future Work ##
-Research on SLAM algorithms suitable for agricultural environments.
-Integration with farm management systems for data-driven agricultural decisions.
+---
+
+## System Overview
+
+- **Perception:** Real-time fruit detection and localization using a custom-trained YOLOv8 model (`yolov8n_tomato.pt`), running on a Jetson Orin Nano for on-edge inference.
+- **Manipulation:** Articulated end-effector designed to adapt to fruit shape/size for low-damage picking.
+- **Navigation:** Planned V-SLAM-based traversal through field rows (not implemented — see Status).
+- **Compute:** Edge inference on Jetson Orin Nano.
+
+## Status
+
+This project was built under a fixed academic timeline and was paused, not completed, when I moved on to my final-year thesis project (obstacle-aware path planning for a SCARA manipulator, IGCAR Kalpakkam). Status below is accurate as of hand-off:
+
+| Subsystem | Status | Notes |
+|---|---|---|
+| **Perception** | ✅ Working | Real-time tomato detection and localization performing reliably. [Demo video](#) shows the pipeline running live. |
+| **Manipulation (pick-and-place)** | ⚠️ Partial | End-effector and grasp mechanism functioned, but closed-loop pick-and-place did not work end-to-end. Demoed using hardcoded joint commands rather than perception-driven motion planning (see below). |
+| **Navigation** | ❌ Not started | V-SLAM-based field navigation was scoped but never implemented. |
+
+### Why pick-and-place didn't close the loop
+
+The blocker was on the **motion planning / inverse kinematics** side, not perception or hardware. Detection reliably output a fruit location, but converting that into a valid, collision-free joint trajectory for the arm to reach and grasp it didn't work reliably — the IK solutions either weren't converging consistently or weren't producing motion that aligned the gripper properly with the detected target. Given the project timeline, I demoed the perception pipeline live and used scripted joint commands to show the picking motion in isolation, rather than a fully closed perception → planning → control loop.
+
+This is the main thing I'd revisit first: a proper motion planning layer (e.g. MoveIt 2) between perception output and arm control, with explicit handling for IK failure cases instead of assuming a solution always exists.
+
+## Repository Structure
+
+```
+agrirover/
+├── agrirover/                  # Core package
+├── agrirover_bringup/          # Launch files, system startup
+├── agrirover_description/      # URDF / robot description
+├── agrirover_manipulation/     # Arm control, end-effector logic
+├── agrirover_perception/       # Detection + localization pipeline
+├── yolov8n_tomato.pt           # Trained detection model
+└── Datasets and Misc.zip       # Training data and supporting files
+```
+
+## Future Work
+
+If revisited, the priority order would be:
+
+1. **Motion planning layer** — integrate MoveIt 2 (or equivalent) for IK and collision-aware trajectory generation, replacing the scripted joint commands.
+2. **Closed-loop pick-and-place** — wire perception output directly into the planning layer so grasp targets are generated from live detections, not hardcoded.
+3. **Navigation** — implement V-SLAM for field traversal, the originally scoped but unstarted subsystem.
+4. **Farm management integration** — data logging for yield tracking and harvesting decisions.
+
+## Why This Project Stopped Here
+
+Agrirover was a semester-long academic project, and the timeline ended before the manipulation and navigation subsystems could be fully closed out. Rather than leave it half-documented, this README reflects exactly where it landed: a working, validated perception system, a partially working manipulation pipeline, and a navigation stack that was scoped but not started.
+
+The IK/motion-planning gap here was a direct input into how I approached Project Tvastr afterward.
