@@ -21,11 +21,22 @@ This was my first ground-up robotics systems project — integrating perception,
 
 This project was built under a fixed academic timeline and was paused, not completed, when I moved on to my final-year thesis project (obstacle-aware path planning for a SCARA manipulator, IGCAR Kalpakkam). Status below is accurate as of hand-off:
 
+<p align="center">
+  <img src="https://github.com/user-attachments/assets/c936b987-c656-48c5-a04b-7ece26a0c295" height="300" />
+  <img src="https://github.com/user-attachments/assets/6f1701e5-93db-48ba-9f86-268d900140a4" height="300" />
+</p>
+
+
 | Subsystem | Status | Notes |
 |---|---|---|
 | **Perception** | ✅ Working | Real-time tomato detection and localization performing reliably. [Demo video](#) shows the pipeline running live. |
 | **Manipulation (pick-and-place)** | ⚠️ Partial | End-effector and grasp mechanism functioned, but closed-loop pick-and-place did not work end-to-end. Demoed using hardcoded joint commands rather than perception-driven motion planning (see below). |
 | **Navigation** | ❌ Not started | V-SLAM-based field navigation was scoped but never implemented. |
+
+
+<p align="center">
+  <video src="https://github.com/user-attachments/assets/91c9d1a5-2fdd-4766-8c50-547cba2d2344" />
+</p>
 
 ### Why pick-and-place didn't close the loop
 
